@@ -2,22 +2,25 @@ import os
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
+# Collect all .txt files in the current directory
 student_files = [doc for doc in os.listdir() if doc.endswith('.txt')]
-student_notes = [open(_file, encoding='utf-8').read()
-                 for _file in student_files]
+student_notes = [open(_file, encoding='utf-8').read() for _file in student_files]
 
+# Convert the text documents into TF-IDF vectors
+def vectorize(text):
+    return TfidfVectorizer().fit_transform(text).toarray()
 
-def vectorize(Text): return TfidfVectorizer().fit_transform(Text).toarray()
-def similarity(doc1, doc2): return cosine_similarity([doc1, doc2])
+# Compute cosine similarity between two vectors
+def similarity(doc1, doc2):
+    return cosine_similarity([doc1, doc2])
 
-
+# Pair filenames with their vector representations
 vectors = vectorize(student_notes)
 s_vectors = list(zip(student_files, vectors))
 plagiarism_results = set()
 
-
+# Check pairwise plagiarism between student submissions
 def check_plagiarism():
-    global s_vectors
     for student_a, text_vector_a in s_vectors:
         new_vectors = s_vectors.copy()
         current_index = new_vectors.index((student_a, text_vector_a))
@@ -29,6 +32,6 @@ def check_plagiarism():
             plagiarism_results.add(score)
     return plagiarism_results
 
-
+# Run the plagiarism checker and print the results
 for data in check_plagiarism():
     print(data)
